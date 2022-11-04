@@ -5,9 +5,7 @@ class SGD:
         self.lr = lr
         
     def update(self, params, grads):
-        # print(cp.abs(params[0]).max(), cp.abs(grads[0]).max())
         for i in range(len(params)):
-            # if i < 3:
             params[i] -= self.lr * grads[i]
 
 class Momentum:

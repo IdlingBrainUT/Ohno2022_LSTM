@@ -23,7 +23,6 @@ class LSTM:
         o = sigmoid(o)
         c_next = f * c_prev + g * i
         h_next = o * tanh(c_next)
-        # h_next = o * sigmoid(c_next)
         self.cache = (x, h_prev, c_prev, i, f, g, o, c_next)
         return h_next, c_next
 
@@ -32,13 +31,10 @@ class LSTM:
         x, h_prev, c_prev, i, f, g, o, c_next = self.cache
         tanh_c_next = tanh(c_next)
         ds = dc_next + (dh_next * o) * (1 - tanh_c_next ** 2)
-        # sig_c_next = sigmoid(c_next)
-        # ds = dc_next + (dh_next * o) * sig_c_next * (1 - sig_c_next)
         dc_prev = ds * f
         di = ds * g
         df = ds * c_prev
         do = dh_next * tanh_c_next
-        # do = dh_next * sig_c_next
         dg = ds * i
         di *= i * (1 - i)
         df *= f * (1 - f)

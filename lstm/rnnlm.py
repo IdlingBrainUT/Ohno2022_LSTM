@@ -7,17 +7,14 @@ class Rnnlm(BaseModel):
     def __init__(self, input_size, output_size=5, rate=[1, 1, 1]):
         rn = np.random.randn
 
-        # 重みの初期化
+        # initialize weights
         lstm_Wx = (rn(input_size, 4 * output_size) / np.sqrt(input_size)).astype('f')
         lstm_Wh = (rn(output_size, 4 * output_size) / np.sqrt(output_size)).astype('f')
         lstm_b = np.zeros(4 * output_size).astype('f')
         affine_W = (rn(output_size, output_size) / np.sqrt(output_size)).astype('f')
-        # affine_W = np.zeros((output_size, output_size)).astype('f')
-        # for i in range(output_size):
-        #     affine_W[i, i] = 10
         affine_b = np.zeros(output_size).astype('f')
 
-        # レイヤの生成
+        # create layers
         self.layers = [
             TimeLSTM(lstm_Wx, lstm_Wh, lstm_b, stateful=True),
             TimeAffine(affine_W, affine_b)
@@ -25,7 +22,7 @@ class Rnnlm(BaseModel):
         self.loss_layer = TimeSquareSumLoss(rate)
         self.lstm_layer = self.layers[0]
 
-        # すべての重みと勾配をリストにまとめる
+        # combine all weights and gradients in a list
         self.params, self.grads = [], []
         for layer in self.layers:
             self.params += layer.params

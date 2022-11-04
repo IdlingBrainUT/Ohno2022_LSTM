@@ -38,7 +38,6 @@ class TimeLSTM:
         for t in reversed(range(n_time)):
             layer = self.layers[t]
             dx, dh, dc = layer.backward(dhs[:, t, :] + dh, dc)
-            # dx, dh, dc = layer.backward(dhs[:, t, :], 0.0)
             dxs[:, t, :] = dx
             for i, grad in enumerate(layer.grads):
                 grads[i] += grad
@@ -96,9 +95,7 @@ class TimeSquareSumLoss:
         diff[:, -n_time_t:, :] = xs[:, -n_time_t:, :] - ts
         diff_null_xy = np.zeros((n_batch, n_time_t, 2))
         diff_null_xy[:, :, :] = ts[:, :, 3:] - (ts[:, :, 3:].sum(axis=0).sum(axis=0) / (n_batch * n_time_t))[np.newaxis, np.newaxis, :]
-        scale = np.array([0.25, 0.25, 0.25, 0.0, 0.0])
-        # scale[3:] = np.square(diff_null_xy).sum(axis=0).sum(axis=0) / (n_batch * n_time_t)
-        scale[3:] = 0.25
+        scale = np.ones(5) * 0.25
         loss_raw = np.square(diff) / 2
         loss_raw /= scale[np.newaxis, np.newaxis, :] * 4
         mask = np.ones_like(loss_raw)
@@ -111,7 +108,6 @@ class TimeSquareSumLoss:
         mask_sum[mask_sum == 0] += 1
         loss = loss_sum / mask_sum
         self.cache = (mask, mask_sum, diff)
-        # print(diff[:, :, 2][mask[:, :, 2] > 0])
         return loss
 
     def backward(self, dout=1):

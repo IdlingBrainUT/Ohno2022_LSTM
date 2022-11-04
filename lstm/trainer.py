@@ -12,32 +12,6 @@ class RnnlmTrainer:
         self.time_idx = None
         self.params = []
 
-    """
-    def get_batch(self, x, t, batch_size, time_size):
-        data_size, I = x.shape
-        _, out_size = t.shape
-        batch_x = np.empty((batch_size, time_size, I), dtype='f')
-        batch_t = np.empty((batch_size, time_size, out_size), dtype='f')
-
-        jump = data_size // batch_size
-        offsets = [i * jump for i in range(batch_size)]  # バッチの各サンプルの読み込み開始位置
-
-        for i, offset in enumerate(offsets):
-            tmp = (offset + self.time_idx) % data_size
-            if data_size - tmp >= time_size:
-                batch_x[i, :, :] = x[tmp:tmp+time_size, :]
-                batch_t[i, :, :] = t[tmp:tmp+time_size, :]
-            else:
-                tmp2 = data_size - tmp
-                tmp3 = time_size - tmp2
-                batch_x[i, :tmp2, :] = x[tmp:, :]
-                batch_x[i, tmp2:, :] = x[:tmp3, :]
-                batch_t[i, :tmp2, :] = t[tmp:, :]
-                batch_t[i, tmp2:, :] = t[:tmp3, :]
-        self.time_idx += time_size
-        return batch_x, batch_t
-    """
-
     def fit(self, xs, ts, max_epoch=10, max_iters=10, batch_size=10, 
             max_effect=150, min_effect=50, max_grad=None, save_params=False):
         if max_effect < min_effect:
@@ -77,17 +51,14 @@ class RnnlmTrainer:
 
                 loss_post = None
                 lr = optimizer.lr
-                # print("loss: ", loss)
                 for _ in range(10):
                     optimizer.update(model.params, model.grads)
                     model.reset_state()
                     loss_post = model.forward(batch_x, batch_t)
-                    # print("loss_post", loss_post)
                     if np.sum(loss * 1.05 >= loss_post) == len(loss):
                         break
                     for i, param in enumerate(params_pre):
                         model.params[i][...] = param[...]
-                    # print("lr: ", optimizer.lr, " -> ", optimizer.lr * 0.1)
                     optimizer.lr *= 0.1
                 optimizer.lr = lr
 

@@ -18,7 +18,6 @@ class Decoder:
         self.h_prev = hs
         self.c_prev = cs
         out = self.affine.forward(hs)
-        # out = hs
         return out[0]
 
     def predict(self, x):
